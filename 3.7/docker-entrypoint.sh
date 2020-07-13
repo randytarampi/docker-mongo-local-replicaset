@@ -61,8 +61,8 @@ waitForMongo 27001 $USERNAME $PASSWORD
 waitForMongo 27002
 waitForMongo 27003
 
-echo "CONFIGURING REPLICA SET: $HOSTNAME"
-CONFIG="{ _id: '$REPLICA_SET_NAME', members: [{_id: 0, host: '$HOSTNAME:27001', priority: 2 }, { _id: 1, host: '$HOSTNAME:27002' }, { _id: 2, host: '$HOSTNAME:27003' } ]}"
+echo "CONFIGURING REPLICA SET"
+CONFIG="{ _id: '$REPLICA_SET_NAME', members: [{_id: 0, host: 'localhost:27001', priority: 2 }, { _id: 1, host: 'localhost:27002' }, { _id: 2, host: 'localhost:27003' } ]}"
 mongo admin --port 27001 -u $USERNAME -p $PASSWORD --eval "db.runCommand({ replSetInitiate: $CONFIG })"
 
 waitForMongo 27002 $USERNAME $PASSWORD
