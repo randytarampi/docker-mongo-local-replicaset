@@ -48,6 +48,12 @@ openssl rand -base64 741 > /var/mongo_keyfile
 chown mongodb /var/mongo_keyfile
 chmod 600 /var/mongo_keyfile
 
+if [ -f "/data/db/pre_start.sh" ]; then
+  echo "RUNNING PRE START SCRIPT"
+
+  bash /data/db/pre_start.sh
+fi
+
 echo "STARTING CLUSTER"
 
 mongod --port 27003 --smallfiles --dbpath /data/db3 --auth --replSet $REPLICA_SET_NAME --keyFile /var/mongo_keyfile  &
@@ -60,6 +66,12 @@ DB1_PID=$!
 waitForMongo 27001 $USERNAME $PASSWORD
 waitForMongo 27002
 waitForMongo 27003
+
+if [ -f "/data/db/pre_configuration.sh" ]; then
+  echo "RUNNING PRE CONFIGURATION SCRIPT"
+
+  bash /data/db/pre_configuration.sh
+fi
 
 echo "CONFIGURING REPLICA SET"
 CONFIG="{ _id: '$REPLICA_SET_NAME', members: [{_id: 0, host: 'localhost:27001', priority: 2 }, { _id: 1, host: 'localhost:27002' }, { _id: 2, host: 'localhost:27003' } ]}"
@@ -74,6 +86,11 @@ mongo admin --port 27003 -u $USERNAME -p $PASSWORD --eval "db.runCommand({ setPa
 
 echo "REPLICA SET ONLINE"
 
+if [ -f "/data/db/post_start.sh" ]; then
+  echo "RUNNING POST START SCRIPT"
+
+  bash /data/db/post_start.sh
+fi
 
 trap 'echo "KILLING"; kill $DB1_PID $DB2_PID $DB3_PID; wait $DB1_PID; wait $DB2_PID; wait $DB3_PID' SIGINT SIGTERM EXIT
 
